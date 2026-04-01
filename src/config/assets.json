@@ -1,0 +1,98 @@
+[
+  {
+    "chain": "bitcoin",
+    "chainId": null,
+    "network": "mainnet",
+    "assetType": "native",
+    "assetId": "btc",
+    "symbol": "BTC",
+    "name": "Bitcoin",
+    "contractAddress": null,
+    "decimals": 8,
+    "status": "active"
+  },
+  {
+    "chain": "ethereum",
+    "chainId": 1,
+    "network": "mainnet",
+    "assetType": "native",
+    "assetId": "eth",
+    "symbol": "ETH",
+    "name": "Ethereum",
+    "contractAddress": null,
+    "decimals": 18,
+    "status": "active"
+  },
+  {
+    "chain": "ethereum",
+    "chainId": 11155111,
+    "network": "testnet",
+    "assetType": "native",
+    "assetId": "eth",
+    "symbol": "ETH",
+    "name": "Ethereum Sepolia",
+    "contractAddress": null,
+    "decimals": 18,
+    "status": "active"
+  },
+  {
+    "chain": "ethereum",
+    "chainId": 1,
+    "network": "mainnet",
+    "assetType": "erc20",
+    "assetId": "uni",
+    "symbol": "UNI",
+    "name": "Uniswap",
+    "contractAddress": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
+    "decimals": 18,
+    "status": "active"
+  },
+  {
+    "chain": "ethereum",
+    "chainId": 1,
+    "network": "mainnet",
+    "assetType": "erc20",
+    "assetId": "usdt",
+    "symbol": "USDT",
+    "name": "Tether USD",
+    "contractAddress": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    "decimals": 6,
+    "status": "active"
+  },
+  {
+    "chain": "ethereum",
+    "chainId": 1,
+    "network": "mainnet",
+    "assetType": "erc20",
+    "assetId": "link",
+    "symbol": "LINK",
+    "name": "Chainlink",
+    "contractAddress": "0x514910771af9ca656af840dff83e8264ecf986ca",
+    "decimals": 18,
+    "status": "active"
+  },
+  {
+    "chain": "ethereum",
+    "chainId": 11155111,
+    "network": "testnet",
+    "assetType": "erc20",
+    "assetId": "link",
+    "symbol": "LINK",
+    "name": "Chainlink Token Sepolia",
+    "contractAddress": "0x779877a7b0d9e8603169ddbd7836e478b4624789",
+    "decimals": 18,
+    "status": "active"
+  },
+  {
+    "chain": "ethereum",
+    "chainId": 1,
+    "network": "mainnet",
+    "assetType": "erc20",
+    "assetId": "aave",
+    "symbol": "AAVE",
+    "name": "Aave",
+    "contractAddress": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
+    "decimals": 18,
+    "status": "active"
+  }
+]
