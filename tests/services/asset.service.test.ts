@@ -42,9 +42,9 @@ describe('AssetService', () => {
       chainId: 11155111,
     });
 
-    expect(result).toHaveLength(1);
-    expect(result[0]?.symbol).toBe('ETH');
-    expect(result[0]?.chainId).toBe(11155111);
-    expect(result[0]?.network).toBe('testnet');
+    expect(result).toHaveLength(2);
+    expect(result.map((asset) => asset.symbol)).toEqual(['ETH', 'LINK']);
+    expect(result.every((asset) => asset.chainId === 11155111)).toBe(true);
+    expect(result.every((asset) => asset.network === 'testnet')).toBe(true);
   });
 });
