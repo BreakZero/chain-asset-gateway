@@ -23,6 +23,7 @@ describe('mapErc20EthereumBalance', () => {
     expect(result.asset.chainId).toBe(1);
     expect(result.asset.network).toBe('mainnet');
     expect(result.asset.status).toBe('active');
+    expect(result.asset.logoUrl).toBeNull();
     expect(result.amount.formatted).toBe('1.2345');
     expect(result.valueUsd).toBe('1.23');
   });

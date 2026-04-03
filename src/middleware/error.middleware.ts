@@ -5,11 +5,20 @@ import { logger } from '@/utils/logger';
 
 export const errorMiddleware = (
   error: unknown,
-  _request: Request,
+  request: Request,
   response: Response,
   _next: NextFunction,
 ): void => {
   if (error instanceof AppError) {
+    logger.error('Handled application error', {
+      method: request.method,
+      path: request.originalUrl,
+      code: error.code,
+      statusCode: error.statusCode,
+      message: error.message,
+      details: error.details ?? null,
+    });
+
     response.status(error.statusCode).json({
       success: false,
       error: {

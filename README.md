@@ -43,6 +43,7 @@ SEPOLIA_RPC_URL=
 BITCOIN_RPC_URL=
 BITCOIN_RPC_USERNAME=
 BITCOIN_RPC_PASSWORD=
+BITCOIN_INDEXER_BASE_URL=https://mempool.space/api
 COINGECKO_API_KEY=
 COINGECKO_BASE_URL=https://api.coingecko.com/api/v3
 ```
@@ -52,6 +53,7 @@ Notes:
 - `ETHEREUM_RPC_URL` is required for Ethereum balance and transaction endpoints
 - `SEPOLIA_RPC_URL` is required when calling EVM endpoints with `chainId=11155111`
 - `BITCOIN_RPC_URL` and Bitcoin RPC auth values are required for Bitcoin transaction endpoints
+- `BITCOIN_INDEXER_BASE_URL` is used for Bitcoin address balance and UTXO-style lookups
 - `COINGECKO_API_KEY` may be needed depending on your CoinGecko plan
 - TODO: Replace public/shared endpoints with production-managed providers and secret management
 
@@ -88,8 +90,14 @@ Optional query params:
 
 - `chain`
 - `chainId`
+- `network`
 - `assetType`
 - `symbol`
+
+Behavior:
+
+- default `network=mainnet`
+- use `network=testnet` to get the supported testnet asset list
 
 Example response:
 
@@ -106,6 +114,7 @@ Example response:
         "assetId": "btc",
         "symbol": "BTC",
         "name": "Bitcoin",
+        "logoUrl": "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
         "contractAddress": null,
         "decimals": 8,
         "status": "active",
@@ -118,6 +127,65 @@ Example response:
   "meta": {
     "source": "config:assets-json",
     "updatedAt": "2026-04-01T00:00:00.000Z"
+  }
+}
+```
+
+Example testnet request:
+
+```bash
+curl "http://localhost:3000/v1/assets?network=testnet"
+```
+
+### `GET /v1/market/chart`
+
+Returns lightweight K-line chart data for BTC, ETH, and supported Ethereum ERC20 assets using CoinGecko market chart data mapped into candles.
+
+Optional query params:
+
+- `chain`
+- `chainId`
+- `assetId`
+- `contractAddress`
+- `symbol`
+- `days`
+- `interval`
+
+Notes:
+
+- `currency` is normalized to `USD`
+- `interval` currently supports `hourly` and `daily`
+- `Sepolia ERC20` market chart data is not supported in this MVP
+
+Example response:
+
+```json
+{
+  "success": true,
+  "data": {
+    "chain": "ethereum",
+    "chainId": 1,
+    "assetId": "ethereum",
+    "contractAddress": null,
+    "currency": "USD",
+    "interval": "daily",
+    "days": 7,
+    "candles": [
+      {
+        "openTime": "2026-04-01T00:00:00.000Z",
+        "closeTime": "2026-04-02T00:00:00.000Z",
+        "open": "3200",
+        "high": "3300",
+        "low": "3100",
+        "close": "3250"
+      }
+    ],
+    "source": "coingecko",
+    "updatedAt": "2026-04-02T00:00:00.000Z"
+  },
+  "meta": {
+    "source": "coingecko",
+    "updatedAt": "2026-04-02T00:00:00.000Z"
   }
 }
 ```
@@ -197,6 +265,7 @@ Example response:
       "assetId": "eth",
       "symbol": "ETH",
       "name": "Ethereum",
+      "logoUrl": "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
       "contractAddress": null,
       "decimals": 18,
       "status": "active",
@@ -216,6 +285,137 @@ Example response:
   "meta": {
     "source": "ethereum-rpc",
     "updatedAt": "2026-04-01T00:00:00.000Z"
+  }
+}
+```
+
+### `GET /v1/balances/bitcoin/:address/native`
+
+Optional query:
+
+- `includePrice=false`
+
+Notes:
+
+- This MVP implementation uses a mempool/Esplora-style Bitcoin indexer API through the provider layer
+- Bitcoin Core RPC remains responsible for raw transaction and broadcast flows
+
+Example response:
+
+```json
+{
+  "success": true,
+  "data": {
+    "chain": "bitcoin",
+    "chainId": null,
+    "address": "bc1qexampleaddress0000000000000000000000000",
+    "asset": {
+      "chain": "bitcoin",
+      "chainId": null,
+      "network": "mainnet",
+      "assetType": "native",
+      "assetId": "btc",
+      "symbol": "BTC",
+      "name": "Bitcoin",
+      "logoUrl": "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
+      "contractAddress": null,
+      "decimals": 8,
+      "status": "active",
+      "source": "bitcoin-rpc",
+      "updatedAt": "2026-04-02T00:00:00.000Z"
+    },
+    "amount": {
+      "raw": "1500000",
+      "formatted": "0.015",
+      "decimals": 8
+    },
+    "priceUsd": "68000",
+    "valueUsd": "1020.00",
+    "source": "bitcoin-rpc",
+    "updatedAt": "2026-04-02T00:00:00.000Z"
+  },
+  "meta": {
+    "source": "bitcoin-rpc",
+    "updatedAt": "2026-04-02T00:00:00.000Z"
+  }
+}
+```
+
+### `GET /v1/addresses/bitcoin/:address/utxos`
+
+Returns the current unspent outputs for a Bitcoin address using the configured Bitcoin indexer provider.
+
+Example response:
+
+```json
+{
+  "success": true,
+  "data": {
+    "address": "bc1qexampleaddress0000000000000000000000000",
+    "items": [
+      {
+        "txid": "abc",
+        "vout": 0,
+        "value": "0.015",
+        "status": {
+          "confirmed": true,
+          "blockHeight": 100,
+          "blockHash": "hash",
+          "blockTime": 123
+        }
+      }
+    ],
+    "total": 1,
+    "source": "bitcoin-indexer",
+    "updatedAt": "2026-04-02T00:00:00.000Z"
+  },
+  "meta": {
+    "source": "bitcoin-indexer",
+    "updatedAt": "2026-04-02T00:00:00.000Z"
+  }
+}
+```
+
+### `GET /v1/addresses/bitcoin/:address/transactions`
+
+Returns a lightweight Bitcoin address transaction list using the configured Bitcoin indexer provider.
+
+Optional query:
+
+- `lastSeenTxid`
+- `limit` default `25`, max `25`
+
+Example response:
+
+```json
+{
+  "success": true,
+  "data": {
+    "address": "bc1qexampleaddress0000000000000000000000000",
+    "items": [
+      {
+        "chain": "bitcoin",
+        "chainId": null,
+        "hash": "def",
+        "status": "pending",
+        "blockNumber": null,
+        "from": null,
+        "to": null,
+        "valueRaw": null,
+        "valueFormatted": null,
+        "decimals": 8,
+        "updatedAt": "2026-04-02T00:00:00.000Z",
+        "source": "bitcoin-indexer"
+      }
+    ],
+    "total": 1,
+    "nextCursor": "def",
+    "source": "bitcoin-indexer",
+    "updatedAt": "2026-04-02T00:00:00.000Z"
+  },
+  "meta": {
+    "source": "bitcoin-indexer",
+    "updatedAt": "2026-04-02T00:00:00.000Z"
   }
 }
 ```
@@ -245,6 +445,7 @@ Example response:
       "assetId": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
       "symbol": "USDC",
       "name": "USD Coin",
+      "logoUrl": null,
       "contractAddress": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
       "decimals": 6,
       "status": "active",

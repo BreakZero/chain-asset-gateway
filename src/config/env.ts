@@ -11,6 +11,7 @@ const envSchema = z.object({
   BITCOIN_RPC_URL: z.string().url().optional().or(z.literal('')),
   BITCOIN_RPC_USERNAME: z.string().optional().or(z.literal('')),
   BITCOIN_RPC_PASSWORD: z.string().optional().or(z.literal('')),
+  BITCOIN_INDEXER_BASE_URL: z.string().url().default('https://mempool.space/api'),
   COINGECKO_API_KEY: z.string().optional().or(z.literal('')),
   COINGECKO_BASE_URL: z.string().url().default('https://api.coingecko.com/api/v3'),
 });

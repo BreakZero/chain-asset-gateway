@@ -3,7 +3,13 @@ import axios from 'axios';
 
 import { CHAINS, CURRENCIES, EVM_CHAIN_IDS } from '@/config/constants';
 import { env } from '@/config/env';
-import type { GetPriceInput, MarketProvider, ProviderPriceQuote } from '@/providers/market/market.types';
+import type {
+  GetMarketChartInput,
+  GetPriceInput,
+  MarketProvider,
+  ProviderMarketChart,
+  ProviderPriceQuote,
+} from '@/providers/market/market.types';
 import { AppError } from '@/utils/app-error';
 import { nowIso } from '@/utils/time';
 
@@ -71,6 +77,66 @@ export class CoinGeckoMarketProvider implements MarketProvider {
     };
   }
 
+  async getMarketChart(input: GetMarketChartInput): Promise<ProviderMarketChart> {
+    if (input.chain === CHAINS.ETHEREUM && input.chainId === EVM_CHAIN_IDS.ETHEREUM_SEPOLIA && input.contractAddress) {
+      throw new AppError(
+        'Sepolia ERC20 market chart data is not supported in this MVP',
+        501,
+        'TESTNET_MARKET_CHART_UNSUPPORTED',
+        input,
+      );
+    }
+
+    if (input.contractAddress) {
+      const response = await this.client.get<{ prices?: [number, number][] }>(
+        `/coins/${COINGECKO_NATIVE_IDS.ethereum}/contract/${input.contractAddress.toLowerCase()}/market_chart`,
+        {
+          params: {
+            vs_currency: 'usd',
+            days: input.days,
+            interval: input.interval === 'daily' ? 'daily' : undefined,
+          },
+        },
+      );
+
+      return {
+        chain: CHAINS.ETHEREUM,
+        chainId: input.chainId ?? EVM_CHAIN_IDS.ETHEREUM_MAINNET,
+        assetId: input.contractAddress.toLowerCase(),
+        contractAddress: input.contractAddress.toLowerCase(),
+        currency: CURRENCIES.USD,
+        interval: input.interval,
+        days: input.days,
+        candles: this.mapPricePointsToCandles(response.data.prices ?? [], input.interval),
+        source: 'coingecko',
+        updatedAt: nowIso(),
+      };
+    }
+
+    const resolvedAssetId = this.resolveAssetId(input);
+    const response = await this.client.get<{ prices?: [number, number][] }>(`/coins/${resolvedAssetId}/market_chart`, {
+      params: {
+        vs_currency: 'usd',
+        days: input.days,
+        interval: input.interval === 'daily' ? 'daily' : undefined,
+      },
+    });
+
+    return {
+      chain: input.chain,
+      chainId:
+        input.chain === CHAINS.ETHEREUM ? (input.chainId ?? EVM_CHAIN_IDS.ETHEREUM_MAINNET) : null,
+      assetId: resolvedAssetId,
+      contractAddress: null,
+      currency: CURRENCIES.USD,
+      interval: input.interval,
+      days: input.days,
+      candles: this.mapPricePointsToCandles(response.data.prices ?? [], input.interval),
+      source: 'coingecko',
+      updatedAt: nowIso(),
+    };
+  }
+
   private async getTokenPrice(contractAddress: string, chainId: number): Promise<ProviderPriceQuote> {
     const response = await this.client.get<Record<string, { usd?: number }>>(
       `/simple/token_price/${COINGECKO_PLATFORM}`,
@@ -123,5 +189,31 @@ export class CoinGeckoMarketProvider implements MarketProvider {
     }
 
     return COINGECKO_NATIVE_IDS.ethereum;
+  }
+
+  private mapPricePointsToCandles(
+    points: [number, number][],
+    interval: 'hourly' | 'daily',
+  ): ProviderMarketChart['candles'] {
+    const buckets = new Map<number, number[]>();
+    const bucketMs = interval === 'daily' ? 86_400_000 : 3_600_000;
+
+    for (const [timestamp, price] of points) {
+      const bucketStart = Math.floor(timestamp / bucketMs) * bucketMs;
+      const bucket = buckets.get(bucketStart) ?? [];
+      bucket.push(price);
+      buckets.set(bucketStart, bucket);
+    }
+
+    return Array.from(buckets.entries())
+      .sort((left, right) => left[0] - right[0])
+      .map(([bucketStart, prices]) => ({
+        openTime: new Date(bucketStart).toISOString(),
+        closeTime: new Date(bucketStart + bucketMs).toISOString(),
+        open: String(prices[0]),
+        high: String(Math.max(...prices)),
+        low: String(Math.min(...prices)),
+        close: String(prices[prices.length - 1]),
+      }));
   }
 }

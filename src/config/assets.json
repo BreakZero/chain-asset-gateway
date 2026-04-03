@@ -7,6 +7,7 @@
     "assetId": "btc",
     "symbol": "BTC",
     "name": "Bitcoin",
+    "logoUrl": "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
     "contractAddress": null,
     "decimals": 8,
     "status": "active"
@@ -19,6 +20,7 @@
     "assetId": "eth",
     "symbol": "ETH",
     "name": "Ethereum",
+    "logoUrl": "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
     "contractAddress": null,
     "decimals": 18,
     "status": "active"
@@ -31,6 +33,7 @@
     "assetId": "eth",
     "symbol": "ETH",
     "name": "Ethereum Sepolia",
+    "logoUrl": "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
     "contractAddress": null,
     "decimals": 18,
     "status": "active"
@@ -43,6 +46,7 @@
     "assetId": "uni",
     "symbol": "UNI",
     "name": "Uniswap",
+    "logoUrl": "https://assets.coingecko.com/coins/images/12504/large/uniswap-uni.png",
     "contractAddress": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
     "decimals": 18,
     "status": "active"
@@ -55,6 +59,7 @@
     "assetId": "usdt",
     "symbol": "USDT",
     "name": "Tether USD",
+    "logoUrl": "https://assets.coingecko.com/coins/images/325/large/Tether.png",
     "contractAddress": "0xdac17f958d2ee523a2206206994597c13d831ec7",
     "decimals": 6,
     "status": "active"
@@ -67,6 +72,7 @@
     "assetId": "link",
     "symbol": "LINK",
     "name": "Chainlink",
+    "logoUrl": "https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png",
     "contractAddress": "0x514910771af9ca656af840dff83e8264ecf986ca",
     "decimals": 18,
     "status": "active"
@@ -79,6 +85,7 @@
     "assetId": "link",
     "symbol": "LINK",
     "name": "Chainlink Token Sepolia",
+    "logoUrl": "https://assets.coingecko.com/coins/images/877/large/chainlink-new-logo.png",
     "contractAddress": "0x779877a7b0d9e8603169ddbd7836e478b4624789",
     "decimals": 18,
     "status": "active"
@@ -91,6 +98,7 @@
     "assetId": "aave",
     "symbol": "AAVE",
     "name": "Aave",
+    "logoUrl": "https://assets.coingecko.com/coins/images/12645/large/AAVE.png",
     "contractAddress": "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9",
     "decimals": 18,
     "status": "active"

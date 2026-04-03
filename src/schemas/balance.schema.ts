@@ -1,6 +1,10 @@
 import { z } from 'zod';
 
-import { ethereumAddressSchema } from '@/schemas/common.schema';
+import { bitcoinAddressSchema, ethereumAddressSchema } from '@/schemas/common.schema';
+
+export const getBitcoinNativeBalanceParamsSchema = z.object({
+  address: bitcoinAddressSchema,
+});
 
 export const getEthereumNativeBalanceParamsSchema = z.object({
   address: ethereumAddressSchema,

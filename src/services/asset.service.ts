@@ -11,6 +11,7 @@ interface SupportedAssetConfig {
   assetId: string;
   symbol: string | null;
   name: string | null;
+  logoUrl: string | null;
   contractAddress: string | null;
   decimals: number | null;
   status: Asset['status'];
@@ -26,6 +27,10 @@ export class AssetService {
 
     return this.assets
       .filter((asset) => {
+        if (asset.network !== query.network) {
+          return false;
+        }
+
         if (query.chain && asset.chain !== query.chain) {
           return false;
         }

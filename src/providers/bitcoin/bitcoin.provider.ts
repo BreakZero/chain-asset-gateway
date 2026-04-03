@@ -1,5 +1,9 @@
 import { BitcoinRpcClient } from '@/providers/bitcoin/bitcoin-rpc.client';
-import type { BitcoinChainInfo, BitcoinProvider, BitcoinTransactionRaw } from '@/providers/bitcoin/bitcoin.types';
+import type {
+  BitcoinChainInfo,
+  BitcoinProvider,
+  BitcoinTransactionRaw,
+} from '@/providers/bitcoin/bitcoin.types';
 import { AppError } from '@/utils/app-error';
 
 export class BitcoinCoreProvider implements BitcoinProvider {
@@ -43,10 +47,5 @@ export class BitcoinCoreProvider implements BitcoinProvider {
   async broadcastTransaction(rawTx: string): Promise<{ txHash: string }> {
     const txHash = await this.rpcClient.call<string>('sendrawtransaction', [rawTx]);
     return { txHash };
-  }
-
-  async getAddressUtxos(_address: string): Promise<unknown[]> {
-    // TODO: Pure Bitcoin Core RPC does not provide reliable address-based UTXO indexing without extra indexers.
-    return [];
   }
 }

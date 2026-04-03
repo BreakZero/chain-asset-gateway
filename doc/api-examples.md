@@ -10,6 +10,7 @@ This document provides practical request examples, expected response shapes, and
 - `.env` is configured
 - `ETHEREUM_RPC_URL` is required for Ethereum balance and transaction endpoints
 - `SEPOLIA_RPC_URL` is required for Sepolia balance and transaction endpoints
+- `BITCOIN_INDEXER_BASE_URL` is used for Bitcoin address balance requests
 - `COINGECKO_BASE_URL` is required for price lookups
 - `COINGECKO_API_KEY` may be required depending on the upstream plan
 
@@ -29,16 +30,28 @@ Get all supported assets:
 curl "http://localhost:3000/v1/assets"
 ```
 
+This defaults to:
+
+```bash
+curl "http://localhost:3000/v1/assets?network=mainnet"
+```
+
 Filter by chain:
 
 ```bash
 curl "http://localhost:3000/v1/assets?chain=ethereum"
 ```
 
-Filter by Sepolia:
+Get testnet assets:
 
 ```bash
-curl "http://localhost:3000/v1/assets?chain=ethereum&chainId=11155111"
+curl "http://localhost:3000/v1/assets?network=testnet"
+```
+
+Filter testnet assets by Sepolia:
+
+```bash
+curl "http://localhost:3000/v1/assets?network=testnet&chain=ethereum&chainId=11155111"
 ```
 
 Filter by symbol:
@@ -62,6 +75,7 @@ curl "http://localhost:3000/v1/assets?symbol=USDT"
         "assetId": "btc",
         "symbol": "BTC",
         "name": "Bitcoin",
+        "logoUrl": "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
         "contractAddress": null,
         "decimals": 8,
         "status": "active",
@@ -76,6 +90,7 @@ curl "http://localhost:3000/v1/assets?symbol=USDT"
         "assetId": "eth",
         "symbol": "ETH",
         "name": "Ethereum",
+        "logoUrl": "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
         "contractAddress": null,
         "decimals": 18,
         "status": "active",
@@ -94,7 +109,7 @@ curl "http://localhost:3000/v1/assets?symbol=USDT"
 
 ### Common Failure Cases
 
-- Invalid `chain` or `assetType` query value: `400 VALIDATION_ERROR`
+- Invalid `chain`, `network`, or `assetType` query value: `400 VALIDATION_ERROR`
 - No matched assets: returns `success: true` with an empty `items` array and `total: 0`
 
 ## 1. Health
@@ -199,6 +214,68 @@ Example error shape:
 }
 ```
 
+## 2.1 Market Chart
+
+### Request
+
+BTC daily candles:
+
+```bash
+curl "http://localhost:3000/v1/market/chart?chain=bitcoin&assetId=bitcoin&days=7&interval=daily"
+```
+
+ETH hourly candles:
+
+```bash
+curl "http://localhost:3000/v1/market/chart?chain=ethereum&assetId=ethereum&days=1&interval=hourly"
+```
+
+ERC20 by contract:
+
+```bash
+curl "http://localhost:3000/v1/market/chart?chain=ethereum&contractAddress=0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48&days=7&interval=daily"
+```
+
+### Expected Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "chain": "bitcoin",
+    "chainId": null,
+    "assetId": "bitcoin",
+    "contractAddress": null,
+    "currency": "USD",
+    "interval": "daily",
+    "days": 7,
+    "candles": [
+      {
+        "openTime": "2026-04-01T00:00:00.000Z",
+        "closeTime": "2026-04-02T00:00:00.000Z",
+        "open": "68000",
+        "high": "69000",
+        "low": "67000",
+        "close": "68500"
+      }
+    ],
+    "source": "coingecko",
+    "updatedAt": "2026-04-02T00:00:00.000Z"
+  },
+  "meta": {
+    "source": "coingecko",
+    "updatedAt": "2026-04-02T00:00:00.000Z"
+  }
+}
+```
+
+### Common Failure Cases
+
+- Missing asset selector fields: `400 VALIDATION_ERROR`
+- Invalid `interval`: `400 VALIDATION_ERROR`
+- Unsupported Sepolia ERC20 chart request: `501 TESTNET_MARKET_CHART_UNSUPPORTED`
+- Upstream CoinGecko errors or rate limiting: `5xx` provider failure
+
 ## 3. ERC20 Price
 
 ### Request
@@ -272,6 +349,7 @@ curl "http://localhost:3000/v1/balances/ethereum/0xd8dA6BF26964aF9D7eEd9e03E5341
       "assetId": "eth",
       "symbol": "ETH",
       "name": "Ethereum",
+      "logoUrl": "https://assets.coingecko.com/coins/images/279/large/ethereum.png",
       "contractAddress": null,
       "decimals": 18,
       "status": "active",
@@ -301,6 +379,165 @@ curl "http://localhost:3000/v1/balances/ethereum/0xd8dA6BF26964aF9D7eEd9e03E5341
 - Missing `ETHEREUM_RPC_URL`: `500 EVM_PROVIDER_NOT_CONFIGURED`
 - Missing `SEPOLIA_RPC_URL` while using `chainId=11155111`: `500 EVM_PROVIDER_NOT_CONFIGURED`
 - Upstream RPC timeout or failure: `5xx` provider failure
+
+## 4.1 Bitcoin Native Balance
+
+### Request
+
+```bash
+curl "http://localhost:3000/v1/balances/bitcoin/bc1qexampleaddress0000000000000000000000000/native"
+```
+
+Without price lookup:
+
+```bash
+curl "http://localhost:3000/v1/balances/bitcoin/bc1qexampleaddress0000000000000000000000000/native?includePrice=false"
+```
+
+### Expected Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "chain": "bitcoin",
+    "chainId": null,
+    "address": "bc1qexampleaddress0000000000000000000000000",
+    "asset": {
+      "chain": "bitcoin",
+      "chainId": null,
+      "network": "mainnet",
+      "assetType": "native",
+      "assetId": "btc",
+      "symbol": "BTC",
+      "name": "Bitcoin",
+      "logoUrl": "https://assets.coingecko.com/coins/images/1/large/bitcoin.png",
+      "contractAddress": null,
+      "decimals": 8,
+      "status": "active",
+      "source": "bitcoin-rpc",
+      "updatedAt": "2026-04-02T00:00:00.000Z"
+    },
+    "amount": {
+      "raw": "1500000",
+      "formatted": "0.015",
+      "decimals": 8
+    },
+    "priceUsd": "68000",
+    "valueUsd": "1020.00",
+    "source": "bitcoin-rpc",
+    "updatedAt": "2026-04-02T00:00:00.000Z"
+  },
+  "meta": {
+    "source": "bitcoin-rpc",
+    "updatedAt": "2026-04-02T00:00:00.000Z"
+  }
+}
+```
+
+### Common Failure Cases
+
+- Invalid Bitcoin address: `400 VALIDATION_ERROR`
+- Invalid or unavailable Bitcoin indexer base URL: `5xx` provider failure
+- Upstream Bitcoin indexer timeout or error: `5xx` provider failure
+
+## 4.2 Bitcoin Address UTXOs
+
+### Request
+
+```bash
+curl "http://localhost:3000/v1/addresses/bitcoin/bc1qexampleaddress0000000000000000000000000/utxos"
+```
+
+### Expected Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "address": "bc1qexampleaddress0000000000000000000000000",
+    "items": [
+      {
+        "txid": "abc",
+        "vout": 0,
+        "value": "0.015",
+        "status": {
+          "confirmed": true,
+          "blockHeight": 100,
+          "blockHash": "hash",
+          "blockTime": 123
+        }
+      }
+    ],
+    "total": 1,
+    "source": "bitcoin-indexer",
+    "updatedAt": "2026-04-02T00:00:00.000Z"
+  },
+  "meta": {
+    "source": "bitcoin-indexer",
+    "updatedAt": "2026-04-02T00:00:00.000Z"
+  }
+}
+```
+
+### Common Failure Cases
+
+- Invalid Bitcoin address: `400 VALIDATION_ERROR`
+- Upstream Bitcoin indexer timeout or error: `5xx` provider failure
+
+## 4.3 Bitcoin Address Transactions
+
+### Request
+
+```bash
+curl "http://localhost:3000/v1/addresses/bitcoin/bc1qexampleaddress0000000000000000000000000/transactions"
+```
+
+Next page:
+
+```bash
+curl "http://localhost:3000/v1/addresses/bitcoin/bc1qexampleaddress0000000000000000000000000/transactions?lastSeenTxid=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa&limit=25"
+```
+
+### Expected Response
+
+```json
+{
+  "success": true,
+  "data": {
+    "address": "bc1qexampleaddress0000000000000000000000000",
+    "items": [
+      {
+        "chain": "bitcoin",
+        "chainId": null,
+        "hash": "def",
+        "status": "pending",
+        "blockNumber": null,
+        "from": null,
+        "to": null,
+        "valueRaw": null,
+        "valueFormatted": null,
+        "decimals": 8,
+        "updatedAt": "2026-04-02T00:00:00.000Z",
+        "source": "bitcoin-indexer"
+      }
+    ],
+    "total": 1,
+    "nextCursor": "def",
+    "source": "bitcoin-indexer",
+    "updatedAt": "2026-04-02T00:00:00.000Z"
+  },
+  "meta": {
+    "source": "bitcoin-indexer",
+    "updatedAt": "2026-04-02T00:00:00.000Z"
+  }
+}
+```
+
+### Common Failure Cases
+
+- Invalid Bitcoin address: `400 VALIDATION_ERROR`
+- Upstream Bitcoin indexer timeout or error: `5xx` provider failure
 
 ## 5. Ethereum ERC20 Balance
 
@@ -341,6 +578,7 @@ curl "http://localhost:3000/v1/balances/ethereum/0xd8dA6BF26964aF9D7eEd9e03E5341
       "assetId": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
       "symbol": "USDC",
       "name": "USD Coin",
+      "logoUrl": null,
       "contractAddress": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
       "decimals": 6,
       "status": "active",

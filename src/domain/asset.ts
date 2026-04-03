@@ -11,6 +11,7 @@ export interface Asset {
   assetId: string;
   symbol: string | null;
   name: string | null;
+  logoUrl: string | null;
   contractAddress: string | null;
   decimals: number | null;
   status: AssetStatus;
