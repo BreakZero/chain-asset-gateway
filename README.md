@@ -9,6 +9,7 @@ Detailed request and response examples are available in [doc/api-examples.md](./
 - Bitcoin raw chain info and transaction lookup through a Bitcoin Core compatible JSON-RPC provider
 - Ethereum mainnet and Sepolia raw on-chain balance and transaction access via JSON-RPC
 - Market prices for BTC, ETH, and Ethereum ERC20 tokens through CoinGecko
+- Crypto news aggregation through Blockchair News API
 - Config-backed supported asset catalog endpoint for frontend asset selection
 - Normalized frontend-friendly API response shapes
 
@@ -46,6 +47,8 @@ BITCOIN_RPC_PASSWORD=
 BITCOIN_INDEXER_BASE_URL=https://mempool.space/api
 COINGECKO_API_KEY=
 COINGECKO_BASE_URL=https://api.coingecko.com/api/v3
+BLOCKCHAIR_API_KEY=
+BLOCKCHAIR_BASE_URL=https://api.blockchair.com
 ```
 
 Notes:
@@ -55,6 +58,7 @@ Notes:
 - `BITCOIN_RPC_URL` and Bitcoin RPC auth values are required for Bitcoin transaction endpoints
 - `BITCOIN_INDEXER_BASE_URL` is used for Bitcoin address balance and UTXO-style lookups
 - `COINGECKO_API_KEY` may be needed depending on your CoinGecko plan
+- `BLOCKCHAIR_API_KEY` should be configured for production use and must stay server-side
 - TODO: Replace public/shared endpoints with production-managed providers and secret management
 
 ## Local Development
@@ -186,6 +190,67 @@ Example response:
   "meta": {
     "source": "coingecko",
     "updatedAt": "2026-04-02T00:00:00.000Z"
+  }
+}
+```
+
+### `GET /v1/news`
+
+Returns related crypto news through Blockchair's `https://api.blockchair.com/news` endpoint.
+
+Optional query params:
+
+- `query`
+- `rawQuery`
+- `chain`
+- `chainId`
+- `assetId`
+- `symbol`
+- `contractAddress`
+- `limit`
+- `offset`
+
+Notes:
+
+- `query` is the frontend-friendly search term
+- `rawQuery` is passed through to Blockchair's `q` parameter for advanced usage
+- if `query` is omitted, the service will infer a search term from the configured asset catalog when possible
+
+Example response:
+
+```json
+{
+  "success": true,
+  "data": {
+    "items": [
+      {
+        "id": "article-1",
+        "chain": "bitcoin",
+        "chainId": null,
+        "assetId": "btc",
+        "symbol": "BTC",
+        "title": "Bitcoin ETF headlines",
+        "summary": "Headline summary",
+        "url": "https://example.com/news/1",
+        "sourceName": "Example News",
+        "language": "en",
+        "publishedAt": "2026-04-10T00:00:00.000Z",
+        "imageUrl": null,
+        "raw": {
+          "title": "Bitcoin ETF headlines"
+        }
+      }
+    ],
+    "total": 1,
+    "limit": 10,
+    "offset": 0,
+    "query": "Bitcoin",
+    "source": "blockchair",
+    "updatedAt": "2026-04-10T00:00:00.000Z"
+  },
+  "meta": {
+    "source": "blockchair",
+    "updatedAt": "2026-04-10T00:00:00.000Z"
   }
 }
 ```

@@ -14,6 +14,8 @@ const envSchema = z.object({
   BITCOIN_INDEXER_BASE_URL: z.string().url().default('https://mempool.space/api'),
   COINGECKO_API_KEY: z.string().optional().or(z.literal('')),
   COINGECKO_BASE_URL: z.string().url().default('https://api.coingecko.com/api/v3'),
+  BLOCKCHAIR_API_KEY: z.string().optional().or(z.literal('')),
+  BLOCKCHAIR_BASE_URL: z.string().url().default('https://api.blockchair.com'),
 });
 
 const parsed = envSchema.safeParse(process.env);

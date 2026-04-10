@@ -6,6 +6,7 @@ import { assetRouter } from '@/routes/asset.routes';
 import { balanceRouter } from '@/routes/balance.routes';
 import { healthRouter } from '@/routes/health.routes';
 import { marketRouter } from '@/routes/market.routes';
+import { newsRouter } from '@/routes/news.routes';
 import { portfolioRouter } from '@/routes/portfolio.routes';
 import { priceRouter } from '@/routes/price.routes';
 import { transactionRouter } from '@/routes/transaction.routes';
@@ -22,6 +23,7 @@ export const createApp = () => {
   app.use(healthRouter);
   app.use('/v1', assetRouter);
   app.use('/v1', marketRouter);
+  app.use('/v1', newsRouter);
   app.use('/v1', priceRouter);
   app.use('/v1', balanceRouter);
   app.use('/v1', portfolioRouter);
