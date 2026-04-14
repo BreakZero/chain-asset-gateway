@@ -1,5 +1,6 @@
 export interface GetPriceInput {
   chain: 'bitcoin' | 'ethereum';
+  network?: 'mainnet' | 'testnet';
   chainId?: number;
   assetId?: string;
   symbol?: string;

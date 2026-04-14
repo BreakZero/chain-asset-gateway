@@ -1,31 +1,23 @@
-import assetCatalog from '@/config/assets.json';
 import type { Asset } from '@/domain/asset';
+import {
+  fileAssetCatalogRepository,
+  type AssetCatalogEntry,
+  type AssetCatalogRepository,
+} from '@/repositories/asset-catalog.repository';
 import type { GetAssetsQuery } from '@/schemas/asset.schema';
 import { nowIso } from '@/utils/time';
 
-interface SupportedAssetConfig {
-  chain: Asset['chain'];
-  chainId: Asset['chainId'];
-  network: Asset['network'];
-  assetType: Asset['assetType'];
-  assetId: string;
-  symbol: string | null;
-  name: string | null;
-  logoUrl: string | null;
-  contractAddress: string | null;
-  decimals: number | null;
-  status: Asset['status'];
-}
-
 export class AssetService {
-  private readonly source = 'config:assets-json';
-  private readonly assets = assetCatalog as SupportedAssetConfig[];
+  private readonly source = 'data:assets-json';
+
+  constructor(private readonly assetCatalogRepository: AssetCatalogRepository = fileAssetCatalogRepository) {}
 
   getAssets(query: GetAssetsQuery): Asset[] {
     const updatedAt = nowIso();
     const normalizedSymbol = query.symbol?.toUpperCase();
 
-    return this.assets
+    return this.assetCatalogRepository
+      .getAssets()
       .filter((asset) => {
         if (asset.network !== query.network) {
           return false;
@@ -49,7 +41,7 @@ export class AssetService {
 
         return true;
       })
-      .map((asset) => ({
+      .map((asset: AssetCatalogEntry) => ({
         ...asset,
         source: this.source,
         updatedAt,

@@ -17,7 +17,10 @@ export const mapProviderNewsFeedToNewsFeed = (input: ProviderNewsFeed): NewsFeed
     imageUrl: item.imageUrl,
     raw: item.raw,
   })),
+  total: input.total,
   limit: input.limit,
   offset: input.offset,
-  source: input.source
+  query: input.query,
+  source: input.source,
+  updatedAt: input.updatedAt,
 });

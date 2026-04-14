@@ -1,4 +1,5 @@
 import { DEFAULT_CACHE_TTL_MS } from '@/config/constants';
+import type { NetworkType } from '@/domain/asset';
 import type { Balance } from '@/domain/balance';
 import { BitcoinIndexerProvider } from '@/providers/bitcoin/bitcoin-indexer.provider';
 import type { BitcoinAddressProvider } from '@/providers/bitcoin/bitcoin.types';
@@ -12,6 +13,7 @@ export class BitcoinBalanceService {
     private readonly bitcoinAddressProvider: BitcoinAddressProvider = new BitcoinIndexerProvider(),
     private readonly priceService: PriceService = new PriceService(),
     private readonly cache: CacheStore = new InMemoryCacheStore(),
+    private readonly network: NetworkType = 'mainnet',
   ) {}
 
   async getNativeBalance(address: string, includePrice = true): Promise<Balance> {
@@ -44,7 +46,7 @@ export class BitcoinBalanceService {
       asset: {
         chain: 'bitcoin',
         chainId: null,
-        network: 'mainnet',
+        network: this.network,
         assetType: 'native',
         assetId: 'btc',
         symbol: 'BTC',

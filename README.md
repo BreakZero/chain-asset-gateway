@@ -39,6 +39,7 @@ Copy `.env.example` to `.env` and fill in the provider settings.
 ```env
 PORT=3000
 NODE_ENV=development
+ASSET_CATALOG_PATH=./data/assets.json
 ETHEREUM_RPC_URL=
 SEPOLIA_RPC_URL=
 BITCOIN_RPC_URL=
@@ -55,6 +56,7 @@ Notes:
 
 - `ETHEREUM_RPC_URL` is required for Ethereum balance and transaction endpoints
 - `SEPOLIA_RPC_URL` is required when calling EVM endpoints with `chainId=11155111`
+- `ASSET_CATALOG_PATH` points to the runtime asset catalog JSON file and defaults to `./data/assets.json`
 - `BITCOIN_RPC_URL` and Bitcoin RPC auth values are required for Bitcoin transaction endpoints
 - `BITCOIN_INDEXER_BASE_URL` is used for Bitcoin address balance and UTXO-style lookups
 - `COINGECKO_API_KEY` may be needed depending on your CoinGecko plan
@@ -88,7 +90,7 @@ pnpm dev
 
 ### `GET /v1/assets`
 
-Returns the currently supported assets from a local JSON config source. This is an MVP management mechanism and is intended to move to a database-backed catalog later.
+Returns the currently supported assets from a runtime JSON catalog file. This is an MVP management mechanism and is intended to move to a database-backed catalog later.
 
 Optional query params:
 
@@ -586,6 +588,8 @@ These routes are present in the project. Some are partial MVP implementations, o
 ## Project Structure
 
 ```text
+data/
+  assets.json
 src/
   app.ts
   server.ts

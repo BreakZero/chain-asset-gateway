@@ -6,6 +6,7 @@ dotenv.config();
 const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(3000),
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  ASSET_CATALOG_PATH: z.string().min(1).optional(),
   ETHEREUM_RPC_URL: z.string().url().optional().or(z.literal('')),
   SEPOLIA_RPC_URL: z.string().url().optional().or(z.literal('')),
   BITCOIN_RPC_URL: z.string().url().optional().or(z.literal('')),

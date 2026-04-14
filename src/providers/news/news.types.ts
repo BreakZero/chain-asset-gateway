@@ -30,9 +30,12 @@ export interface ProviderNewsArticle {
 
 export interface ProviderNewsFeed {
   items: ProviderNewsArticle[];
+  total: number;
   limit: number;
   offset: number;
+  query: string;
   source: string;
+  updatedAt: string;
 }
 
 export interface NewsProvider {

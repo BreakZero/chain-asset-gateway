@@ -113,9 +113,12 @@ export class BlockchairNewsProvider implements NewsProvider {
 
     return {
       items,
+      total: numberOrNull(response.data.context?.results) ?? items.length,
       limit: numberOrNull(response.data.context?.limit) ?? input.limit,
       offset: numberOrNull(response.data.context?.offset) ?? input.offset,
-      source: 'blockchair'
+      query: input.resolvedQuery,
+      source: 'blockchair',
+      updatedAt: nowIso(),
     };
   }
 }

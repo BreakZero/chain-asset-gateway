@@ -12,7 +12,7 @@ export class PriceService {
   ) {}
 
   async getPrice(input: GetPriceInput): Promise<Price> {
-    const cacheKey = `price:${input.chain}:${input.chainId ?? 'null'}:${input.assetId ?? ''}:${input.symbol ?? ''}:${input.contractAddress ?? ''}`;
+    const cacheKey = `price:${input.chain}:${input.network ?? 'mainnet'}:${input.chainId ?? 'null'}:${input.assetId ?? ''}:${input.symbol ?? ''}:${input.contractAddress ?? ''}`;
     const cached = this.cache.get<Price>(cacheKey);
 
     if (cached) {

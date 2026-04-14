@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { EVM_CHAIN_IDS } from '@/config/constants';
+import { BITCOIN_NETWORKS, EVM_CHAIN_IDS } from '@/config/constants';
 
 export const ethereumAddressSchema = z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid Ethereum address');
 
@@ -23,6 +23,30 @@ export const supportedEvmChainIdSchema = z
     'Unsupported EVM chainId',
   );
 
-export const evmChainQuerySchema = z.object({
-  chainId: supportedEvmChainIdSchema.default(EVM_CHAIN_IDS.ETHEREUM_MAINNET),
+export const networkSchema = z.enum([BITCOIN_NETWORKS.MAINNET, BITCOIN_NETWORKS.TESTNET]);
+
+export const evmChainQuerySchema = z
+  .object({
+    network: networkSchema.optional(),
+    chainId: supportedEvmChainIdSchema.optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.chainId === undefined || value.network === undefined) {
+      return;
+    }
+
+    const expectedNetwork =
+      value.chainId === EVM_CHAIN_IDS.ETHEREUM_SEPOLIA ? BITCOIN_NETWORKS.TESTNET : BITCOIN_NETWORKS.MAINNET;
+
+    if (value.network !== expectedNetwork) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'network and chainId must match for ethereum requests',
+        path: ['chainId'],
+      });
+    }
+  });
+
+export const bitcoinNetworkQuerySchema = z.object({
+  network: networkSchema.default(BITCOIN_NETWORKS.MAINNET),
 });

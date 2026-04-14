@@ -8,4 +8,5 @@ export default defineConfig({
   clean: true,
   dts: false,
   splitting: false,
+  onSuccess: 'mkdir -p dist/data && cp data/assets.json dist/data/assets.json',
 });

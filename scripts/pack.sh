@@ -10,6 +10,7 @@ mkdir -p "${BUILD_DIR}"
 
 tar -czf "${BUILD_DIR}/${APP_NAME}-v${VERSION}.tar.gz" \
   dist \
+  data \
   package.json \
   package-lock.json \
   README.md \

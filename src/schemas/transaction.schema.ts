@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-import { bitcoinTxHashSchema, ethereumTxHashSchema, optionalBitcoinTxHashSchema } from '@/schemas/common.schema';
+import {
+  bitcoinTxHashSchema,
+  ethereumTxHashSchema,
+  networkSchema,
+  optionalBitcoinTxHashSchema,
+} from '@/schemas/common.schema';
 
 export const getEthereumTransactionParamsSchema = z.object({
   txHash: ethereumTxHashSchema,
@@ -15,6 +20,7 @@ export const broadcastBitcoinTransactionBodySchema = z.object({
 });
 
 export const getBitcoinAddressTransactionsQuerySchema = z.object({
+  network: networkSchema.default('mainnet'),
   lastSeenTxid: optionalBitcoinTxHashSchema,
   limit: z.coerce.number().int().positive().max(25).default(25),
 });

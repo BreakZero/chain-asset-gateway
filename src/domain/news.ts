@@ -18,7 +18,10 @@ export interface NewsArticle {
 
 export interface NewsFeed {
   items: NewsArticle[];
+  total: number;
   limit: number;
   offset: number;
+  query: string;
   source: string;
+  updatedAt: string;
 }

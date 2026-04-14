@@ -1,23 +1,19 @@
-import assetCatalog from '@/config/assets.json';
 import { mapProviderNewsFeedToNewsFeed } from '@/mappers/news.mapper';
 import { BlockchairNewsProvider } from '@/providers/news/blockchair-news.provider';
 import type { GetNewsInput, NewsProvider } from '@/providers/news/news.types';
+import {
+  fileAssetCatalogRepository,
+  type AssetCatalogEntry,
+  type AssetCatalogRepository,
+} from '@/repositories/asset-catalog.repository';
 import type { NewsFeed } from '@/domain/news';
 import { AppError } from '@/utils/app-error';
 
-interface SupportedAssetConfig {
-  chain: 'bitcoin' | 'ethereum';
-  chainId: number | null;
-  assetId: string;
-  symbol: string | null;
-  name: string | null;
-  contractAddress: string | null;
-}
-
 export class NewsService {
-  private readonly assets = assetCatalog as SupportedAssetConfig[];
-
-  constructor(private readonly newsProvider: NewsProvider = new BlockchairNewsProvider()) {}
+  constructor(
+    private readonly newsProvider: NewsProvider = new BlockchairNewsProvider(),
+    private readonly assetCatalogRepository: AssetCatalogRepository = fileAssetCatalogRepository,
+  ) {}
 
   async getNews(input: GetNewsInput): Promise<NewsFeed> {
     const resolvedQuery = this.resolveQuery(input);
@@ -38,7 +34,7 @@ export class NewsService {
       return input.query.trim();
     }
 
-    const matchedAsset = this.assets.find((asset) => {
+    const matchedAsset = this.assetCatalogRepository.getAssets().find((asset: AssetCatalogEntry) => {
       if (input.contractAddress && asset.contractAddress?.toLowerCase() === input.contractAddress.toLowerCase()) {
         return true;
       }

@@ -1,11 +1,12 @@
 import { z } from 'zod';
 
 import { CHAINS } from '@/config/constants';
-import { ethereumAddressSchema, supportedEvmChainIdSchema } from '@/schemas/common.schema';
+import { ethereumAddressSchema, networkSchema, supportedEvmChainIdSchema } from '@/schemas/common.schema';
 
 export const getMarketChartQuerySchema = z
   .object({
     chain: z.enum([CHAINS.BITCOIN, CHAINS.ETHEREUM]),
+    network: networkSchema.optional(),
     chainId: supportedEvmChainIdSchema.optional(),
     assetId: z.string().optional(),
     contractAddress: ethereumAddressSchema.optional(),
@@ -14,6 +15,18 @@ export const getMarketChartQuerySchema = z
     interval: z.enum(['hourly', 'daily']).default('daily'),
   })
   .superRefine((value, ctx) => {
+    if (value.chain === CHAINS.ETHEREUM && value.chainId !== undefined && value.network !== undefined) {
+      const expectedNetwork = value.chainId === 11155111 ? 'testnet' : 'mainnet';
+
+      if (value.network !== expectedNetwork) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'network and chainId must match for ethereum requests',
+          path: ['chainId'],
+        });
+      }
+    }
+
     if (value.chain === CHAINS.BITCOIN && !value.assetId && !value.symbol) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
